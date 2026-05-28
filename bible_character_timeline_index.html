@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Old Testament Character Timeline</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --card2: #1f2937;
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --accent: #facc15;
+      --line: #64748b;
+      --book: #38bdf8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #0f172a, #111827);
+      color: var(--text);
+    }
+
+    header {
+      padding: 32px 20px;
+      text-align: center;
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid #334155;
+      position: static;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+    }
+
+    .subtitle {
+      color: var(--muted);
+      max-width: 850px;
+      margin: 0 auto 20px;
+      line-height: 1.5;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    input, select, button {
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 1px solid #475569;
+      background: #020617;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    button {
+      cursor: pointer;
+      background: var(--accent);
+      color: #111827;
+      border: none;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 35px 18px 80px;
+    }
+
+    .timeline {
+      position: relative;
+      margin-left: 20px;
+      padding-left: 35px;
+      border-left: 4px solid var(--line);
+    }
+
+    .book-section {
+      margin-bottom: 55px;
+      position: relative;
+    }
+
+    .book-title {
+      color: var(--book);
+      font-size: 1.7rem;
+      margin: 0 0 20px;
+      padding: 8px 0;
+    }
+
+    .book-title::before {
+      content: "";
+      position: absolute;
+      left: -47px;
+      top: 10px;
+      width: 20px;
+      height: 20px;
+      background: var(--book);
+      border-radius: 50%;
+      border: 4px solid var(--bg);
+    }
+
+    .character-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }
+
+    .character-card {
+      background: linear-gradient(180deg, var(--card), var(--card2));
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 16px;
+      min-height: 92px;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease;
+      z-index: 1;
+    }
+
+    .character-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      z-index: 100000;
+    }
+
+    .character-card:focus-within {
+      z-index: 100000;
+    }
+
+    .character-name {
+      color: var(--accent);
+      font-weight: bold;
+      font-size: 1.08rem;
+      margin-bottom: 8px;
+    }
+
+    .mini {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.35;
+    }
+
+    .popup {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: calc(100% + 10px);
+      width: min(420px, 85vw);
+      background: #020617;
+      color: var(--text);
+      border: 1px solid var(--accent);
+      border-radius: 14px;
+      padding: 16px;
+      z-index: 99999;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+      line-height: 1.45;
+    }
+
+    .character-card:hover .popup,
+    .character-card:focus-within .popup {
+      display: block;
+    }
+
+    .scriptures {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #334155;
+      color: #fde68a;
+      font-size: 0.92rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      margin-top: 30px;
+      font-size: 1.1rem;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 30px;
+      border-top: 1px solid #334155;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        position: static;
+      }
+
+      .timeline {
+        margin-left: 4px;
+        padding-left: 22px;
+      }
+
+      .book-title::before {
+        left: -34px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Old Testament Character Timeline</h1>
+    <p class="subtitle">
+      Hover over a character to see the description, scripture references, and major stories.
+      Use the search box or book filter to narrow the timeline.
+    </p>
+
+    <div class="controls">
+      <input id="searchInput" type="text" placeholder="Search character, story, scripture..." />
+      <select id="bookFilter">
+        <option value="all">All Books</option>
+      </select>
+      <button id="clearBtn">Clear</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="timeline" class="timeline"></section>
+    <p id="emptyMessage" class="empty hidden">No matching characters found.</p>
+  </main>
+
+  <footer>
+    Built as a single HTML file. Edit the character data inside the JavaScript section.
+    <div style="margin-top:12px">
+      <a href="bible_quiz.html" style="color:var(--accent); font-weight:bold;">Take the randomized character quiz →</a>
+    </div>
+  </footer>
+
+  <script>
+    /*
+      HOW TO USE:
+      1. Save this file as index.html.
+      2. Open it in VS Code.
+      3. Replace or expand the characterData array below.
+      4. Right-click index.html and choose "Open with Live Server"
+         if you have the Live Server extension.
+    */
+
+    const characterData = [
+      { book: 'Genesis', name: 'Adam', description: 'Adam first appears in Genesis 2:7 as the first man created by God. He lives in Eden, names the animals, receives Eve as his wife, and falls by eating the forbidden fruit. His story connects him to Eve, Satan/the serpent, Cain, Abel, and Seth.', scriptures: 'Key stories: Creation, Genesis 1–2; Fall, Genesis 3; children, Genesis 4–5.' },
+      { book: 'Genesis', name: 'Eve', description: 'Eve appears in Genesis 2:22 as the first woman, created from Adam. She is tempted by the serpent and eats the forbidden fruit, then Adam follows. She becomes the mother of humanity. She is connected to Adam, Cain, Abel, Seth, and the serpent.', scriptures: 'Key stories: Genesis 2:18–25; Genesis 3; Genesis 4:1–2, 25.' },
+      { book: 'Genesis', name: 'Serpent/Satan', description: 'The serpent appears in Genesis 3:1 and tempts Eve to disobey God. He is connected to Eve, Adam, and the Fall. Christians often interpret him as Satan.', scriptures: 'Key story: Genesis 3:1–15.' },
+      { book: 'Genesis', name: 'Cain', description: 'Cain appears in Genesis 4:1 as Adam and Eve’s first son. He murders his brother Abel after God accepts Abel’s offering but not his. He becomes the first murderer and is punished with exile. Connected to Abel, Adam, Eve, and God.', scriptures: 'Key story: Genesis 4:1–16.' },
+      { book: 'Genesis', name: 'Abel', description: 'Abel appears in Genesis 4:2 as Cain’s brother and a keeper of sheep. His acceptable sacrifice leads to Cain’s jealousy. He is the first person murdered in the Bible.', scriptures: 'Key story: Genesis 4:2–10.' },
+      { book: 'Genesis', name: 'Seth', description: 'Seth appears in Genesis 4:25 as the son given to Adam and Eve after Abel’s death. Through his line comes Noah and eventually Abraham.', scriptures: 'Key references: Genesis 4:25–26; Genesis 5.' },
+      { book: 'Genesis', name: 'Enoch', description: 'Enoch appears in Genesis 5:18–24. He “walked with God” and was taken by God instead of dying. He is connected to Methuselah.', scriptures: 'Key passage: Genesis 5:21–24.' },
+      { book: 'Genesis', name: 'Noah', description: 'Noah appears in Genesis 5:29 and becomes the righteous man through whom humanity survives the Flood. He builds the ark, saves his family and animals, and receives God’s covenant sign of the rainbow. Connected to Shem, Ham, Japheth, and God.', scriptures: 'Key stories: Genesis 6–9.' },
+      { book: 'Genesis', name: 'Shem, Ham, and Japheth', description: 'These are Noah’s sons, introduced in Genesis 5:32. They survive the Flood and become ancestors of many nations. Ham dishonors Noah, while Shem and Japheth act more respectfully.', scriptures: 'Key stories: Genesis 6–10.' },
+      { book: 'Genesis', name: 'Nimrod', description: 'Nimrod appears in Genesis 10:8–12 as a mighty hunter and early kingdom-builder. He is connected to Babel and Mesopotamian power.', scriptures: 'Key passage: Genesis 10:8–12.' },
+      { book: 'Genesis', name: 'Abraham/Abram', description: 'Abraham first appears as Abram in Genesis 11:26. God calls him to leave his homeland and promises him land, descendants, and covenant blessings. He is the father of Isaac and Ishmael and is central to Israel’s covenant identity. Connected to Sarah, Lot, Hagar, Ishmael, Isaac, Melchizedek, Abimelech, and God.', scriptures: 'Key stories: call, Genesis 12; covenant, Genesis 15 and 17; Sodom, Genesis 18–19; Isaac’s sacrifice, Genesis 22.' },
+      { book: 'Genesis', name: 'Sarah/Sarai', description: 'Sarah appears in Genesis 11:29 as Abram’s wife. She is barren for many years but becomes the mother of Isaac by promise. Connected to Abraham, Hagar, Ishmael, Isaac, and Abimelech.', scriptures: 'Key stories: Genesis 12:10–20; Genesis 16; Genesis 18; Genesis 21.' },
+      { book: 'Genesis', name: 'Lot', description: 'Lot appears in Genesis 11:27 as Abraham’s nephew. He travels with Abraham but later settles near Sodom. He is rescued by Abraham and later by angels before Sodom is destroyed.', scriptures: 'Key stories: Genesis 13–14; Genesis 19.' },
+      { book: 'Genesis', name: 'Melchizedek', description: 'Melchizedek appears in Genesis 14:18 as king of Salem and priest of God Most High. He blesses Abraham, and Abraham gives him tithes.', scriptures: 'Key passage: Genesis 14:18–20.' },
+      { book: 'Genesis', name: 'Hagar', description: 'Hagar appears in Genesis 16:1 as Sarah’s Egyptian servant. She bears Ishmael to Abraham but is later sent away. God hears and protects her.', scriptures: 'Key stories: Genesis 16; Genesis 21:8–21.' },
+      { book: 'Genesis', name: 'Ishmael', description: 'Ishmael appears in Genesis 16:11 as the son of Abraham and Hagar. He is blessed by God and becomes ancestor of a great nation, though the covenant line goes through Isaac.', scriptures: 'Key stories: Genesis 16; Genesis 17:18–27; Genesis 21.' },
+      { book: 'Genesis', name: 'Isaac', description: 'Isaac appears promised in Genesis 17 and born in Genesis 21. He is Abraham and Sarah’s covenant son. He nearly becomes a sacrifice in Genesis 22 and later becomes father of Jacob and Esau.', scriptures: 'Key stories: Genesis 21–22; Genesis 24; Genesis 26–27.' },
+      { book: 'Genesis', name: 'Rebekah', description: 'Rebekah appears in Genesis 24:15. She becomes Isaac’s wife and mother of Jacob and Esau. She helps Jacob receive Isaac’s blessing.', scriptures: 'Key stories: Genesis 24; Genesis 25:19–28; Genesis 27.' },
+      { book: 'Genesis', name: 'Jacob/Israel', description: 'Jacob appears in Genesis 25:26. He buys Esau’s birthright, receives Isaac’s blessing, wrestles with God, and is renamed Israel. He fathers the twelve tribes.', scriptures: 'Key stories: Genesis 25; Genesis 27–35; Genesis 37; Genesis 42–49.' },
+      { book: 'Genesis', name: 'Esau', description: 'Esau appears in Genesis 25:25 as Jacob’s twin brother. He sells his birthright and loses the blessing, but later reconciles with Jacob.', scriptures: 'Key stories: Genesis 25:19–34; Genesis 27; Genesis 32–33; Genesis 36.' },
+      { book: 'Genesis', name: 'Laban', description: 'Laban appears in Genesis 24 and becomes Jacob’s uncle and father-in-law. He tricks Jacob into marrying Leah before Rachel.', scriptures: 'Key stories: Genesis 24; Genesis 29–31.' },
+      { book: 'Genesis', name: 'Leah', description: 'Leah appears in Genesis 29:16. She is Jacob’s first wife and mother of several tribes, including Judah and Levi.', scriptures: 'Key stories: Genesis 29–30.' },
+      { book: 'Genesis', name: 'Rachel', description: 'Rachel appears in Genesis 29:6. She is Jacob’s beloved wife and mother of Joseph and Benjamin.', scriptures: 'Key stories: Genesis 29–31; Genesis 35:16–20.' },
+      { book: 'Genesis', name: 'Joseph', description: 'Joseph appears in Genesis 30:24 and becomes the central character of Genesis 37–50. Sold by his brothers, he rises in Egypt and saves his family from famine.', scriptures: 'Key stories: coat and dreams, Genesis 37; temptation, Genesis 39; prison dreams, Genesis 40; Pharaoh’s dreams, Genesis 41; reunion, Genesis 42–45; forgiveness, Genesis 50:15–21.' },
+      { book: 'Genesis', name: 'Judah', description: 'Judah appears in Genesis 29:35 as Leah’s son. He sells Joseph but later offers himself for Benjamin. The royal line later comes through him.', scriptures: 'Key stories: Genesis 37:26–27; Genesis 38; Genesis 44.' },
+      { book: 'Genesis', name: 'Tamar', description: 'Tamar appears in Genesis 38:6. She is Judah’s daughter-in-law and becomes mother of Perez and Zerah after Judah fails to give her proper family protection.', scriptures: 'Key story: Genesis 38.' },
+      { book: 'Genesis', name: 'Benjamin', description: 'Benjamin appears in Genesis 35:18. He is Rachel’s youngest son and Joseph’s full brother. Joseph tests his brothers using Benjamin.', scriptures: 'Key stories: Genesis 35:16–20; Genesis 42–45.' },
+
+      { book: 'Exodus', name: 'Moses', description: 'Moses first appears in Exodus 2:2–10 as a Hebrew baby rescued from Pharaoh’s death order. He becomes Israel’s great prophet, confronts Pharaoh, leads the Exodus, parts the Red Sea, receives the Law, and guides Israel through the wilderness.', scriptures: 'Key stories: birth, Exodus 2; burning bush, Exodus 3; plagues, Exodus 7–12; Red Sea, Exodus 14; Ten Commandments, Exodus 19–20; golden calf, Exodus 32.' },
+      { book: 'Exodus', name: 'Aaron', description: 'Aaron appears in Exodus 4:14 as Moses’s brother and spokesman. He helps confront Pharaoh and becomes Israel’s first high priest. He also sins by helping make the golden calf.', scriptures: 'Key stories: Exodus 4–12; Exodus 28–29; Exodus 32.' },
+      { book: 'Exodus', name: 'Miriam', description: 'Miriam appears in Exodus 2:4 as Moses’s sister watching over him. She later leads Israelite women in song after the Red Sea.', scriptures: 'Key stories: Exodus 2:4–8; Exodus 15:20–21.' },
+      { book: 'Exodus', name: 'Pharaoh', description: 'Pharaoh appears in Exodus 1:8 as the oppressive king of Egypt. He enslaves Israel and refuses to release them until the plagues destroy Egypt’s power.', scriptures: 'Key stories: Exodus 1; Exodus 5–14.' },
+      { book: 'Exodus', name: 'Pharaoh\'s daughter', description: 'Pharaoh\'s daughter appears in Exodus 2:5. She rescues baby Moses from the Nile and raises him.', scriptures: 'Key story: Exodus 2:5–10.' },
+      { book: 'Exodus', name: 'Jochebed', description: 'Jochebed is Moses’s mother, named later in Exodus 6:20. She hides Moses and places him in the basket.', scriptures: 'Key stories: Exodus 2:1–10; Exodus 6:20.' },
+      { book: 'Exodus', name: 'Amram', description: 'Amram is Moses’s father, named in Exodus 6:20. He is connected to Jochebed, Aaron, Moses, and Miriam.', scriptures: 'Key passage: Exodus 6:20.' },
+      { book: 'Exodus', name: 'Jethro/Reuel', description: 'Jethro appears in Exodus 2:18 and 3:1 as Moses’s Midianite father-in-law. He gives Moses wise advice about delegating judgment.', scriptures: 'Key stories: Exodus 2–3; Exodus 18.' },
+      { book: 'Exodus', name: 'Zipporah', description: 'Zipporah appears in Exodus 2:21 as Moses’s wife. She is Jethro’s daughter and mother of Gershom.', scriptures: 'Key story: Exodus 2:16–22; Exodus 4:24–26.' },
+      { book: 'Exodus', name: 'Joshua', description: 'Joshua appears in Exodus 17:9 as Moses’s military assistant. He leads Israel in battle against Amalek and later becomes Moses’s successor.', scriptures: 'Key stories: Exodus 17:8–16; Exodus 24:13; Exodus 33:11.' },
+      { book: 'Exodus', name: 'Hur', description: 'Hur appears in Exodus 17:10. He helps Aaron hold up Moses’s hands during battle.', scriptures: 'Key story: Exodus 17:8–13.' },
+      { book: 'Exodus', name: 'Bezalel', description: 'Bezalel appears in Exodus 31:2 as the craftsman filled with God’s Spirit to build the tabernacle. He is connected to Oholiab and Moses.', scriptures: 'Key passages: Exodus 31:1–11; Exodus 35–36.' },
+      { book: 'Exodus', name: 'Oholiab', description: 'Oholiab appears in Exodus 31:6 as Bezalel’s assistant in tabernacle craftsmanship.', scriptures: 'Key passages: Exodus 31:6; Exodus 35–36.' },
+
+      { book: 'Leviticus', name: 'Moses', description: 'In Leviticus, Moses receives priestly, sacrificial, purity, and holiness laws from God. He instructs Aaron and Israel.', scriptures: 'Key chapters: Leviticus 1–7; 16; 19; 23; 26.' },
+      { book: 'Leviticus', name: 'Aaron', description: 'Aaron is central in Leviticus as high priest. He offers sacrifices and represents Israel before God.', scriptures: 'Key stories: ordination, Leviticus 8–9; Day of Atonement instructions, Leviticus 16.' },
+      { book: 'Leviticus', name: 'Nadab and Abihu', description: 'Nadab and Abihu appear as Aaron’s sons. They offer \u201cstrange fire\u201d before the Lord and are consumed.', scriptures: 'Key story: Leviticus 10:1–7.' },
+      { book: 'Leviticus', name: 'Eleazar', description: 'Eleazar is Aaron’s son and priest. After Nadab and Abihu die, he becomes more important in the priestly line.', scriptures: 'Key references: Leviticus 10:6–20.' },
+      { book: 'Leviticus', name: 'Ithamar', description: 'Ithamar is another son of Aaron who serves as priest.', scriptures: 'Key reference: Leviticus 10:6–20.' },
+      { book: 'Leviticus', name: 'Shelomith\'s son/blasphemer', description: 'An unnamed son of an Israelite woman named Shelomith appears in Leviticus 24:10–16. He blasphemes the name of the Lord and is judged.', scriptures: 'Key story: Leviticus 24:10–23.' },
+      { book: 'Leviticus', name: 'Shelomith', description: 'Shelomith is named as the mother of the blasphemer in Leviticus 24:11.', scriptures: 'Key passage: Leviticus 24:10–11.' },
+
+      { book: 'Numbers', name: 'Moses', description: 'In Numbers, Moses leads Israel through rebellion, wandering, and preparation to enter Canaan. He intercedes for Israel but is barred from entering the promised land after striking the rock.', scriptures: 'Key stories: spies, Numbers 13–14; Korah\'s rebellion, Numbers 16; striking the rock, Numbers 20.' },
+      { book: 'Numbers', name: 'Aaron', description: 'Aaron continues as high priest. His authority is confirmed when his rod buds. He dies before Israel enters Canaan.', scriptures: 'Key stories: Numbers 16–17; death, Numbers 20:22–29.' },
+      { book: 'Numbers', name: 'Miriam', description: 'Miriam challenges Moses with Aaron and is struck with leprosy, then healed after Moses intercedes. She later dies at Kadesh.', scriptures: 'Key stories: Numbers 12; Numbers 20:1.' },
+      { book: 'Numbers', name: 'Joshua', description: 'Joshua is one of the faithful spies and later is appointed to succeed Moses.', scriptures: 'Key stories: Numbers 13–14; Numbers 27:18–23.' },
+      { book: 'Numbers', name: 'Caleb', description: 'Caleb appears in Numbers 13:6 as a spy from Judah. He and Joshua faithfully believe Israel can take the land.', scriptures: 'Key stories: Numbers 13–14.' },
+      { book: 'Numbers', name: 'Korah', description: 'Korah appears in Numbers 16:1 as a Levite who rebels against Moses and Aaron. He is swallowed by the earth with his followers.', scriptures: 'Key story: Numbers 16.' },
+      { book: 'Numbers', name: 'Dathan and Abiram', description: 'Dathan and Abiram rebel with Korah against Moses. They are destroyed in judgment.', scriptures: 'Key story: Numbers 16.' },
+      { book: 'Numbers', name: 'Balak', description: 'Balak appears in Numbers 22:2 as king of Moab. He hires Balaam to curse Israel.', scriptures: 'Key stories: Numbers 22–24.' },
+      { book: 'Numbers', name: 'Balaam', description: 'Balaam appears in Numbers 22:5 as a non-Israelite diviner hired to curse Israel. God forces him to bless Israel instead. His donkey famously speaks.', scriptures: 'Key stories: Numbers 22–24; later judgment, Numbers 31:8, 16.' },
+      { book: 'Numbers', name: 'Phinehas', description: 'Phinehas appears in Numbers 25:7 as Aaron’s grandson. He stops a plague by zealously opposing Israel’s sin with Moabite/Midianite women.', scriptures: 'Key story: Numbers 25.' },
+      { book: 'Numbers', name: 'Zelophehad\'s daughters', description: 'Mahlah, Noah, Hoglah, Milcah, and Tirzah appear in Numbers 27:1–11. They request inheritance rights because their father had no sons. Their case changes Israelite inheritance law.', scriptures: 'Key stories: Numbers 27; Numbers 36.' },
+
+      { book: 'Deuteronomy', name: 'Moses', description: 'Moses is the dominant character in Deuteronomy. He gives final sermons, reviews Israel’s history, repeats the law, blesses the tribes, and dies before entering Canaan.', scriptures: 'Key passages: Deuteronomy 1–4; 5–6; 28–30; death, Deuteronomy 34.' },
+      { book: 'Deuteronomy', name: 'Joshua', description: 'Joshua is confirmed as Moses’s successor. He will lead Israel into Canaan.', scriptures: 'Key passages: Deuteronomy 31:1–8, 14–23; Deuteronomy 34:9.' },
+      { book: 'Deuteronomy', name: 'Israel', description: 'Israel as a covenant people is almost a “character” in Deuteronomy. Moses addresses them as the people rescued from Egypt and bound to God by covenant.', scriptures: 'Key passages: Shema, Deuteronomy 6:4–9; blessings/curses, Deuteronomy 28; covenant renewal, Deuteronomy 29–30.' },
+      { book: 'Deuteronomy', name: 'God/the Lord', description: 'God is central throughout Deuteronomy as Israel’s deliverer, lawgiver, covenant maker, and judge.', scriptures: 'Key passages: Deuteronomy 5–6; Deuteronomy 7; Deuteronomy 30; Deuteronomy 32.' },
+      { book: 'Deuteronomy', name: 'Aaron', description: 'Aaron is remembered as Moses’s brother and high priest, especially in references to his death and Israel’s rebellion.', scriptures: 'Key passages: Deuteronomy 9:20; Deuteronomy 10:6.' },
+      { book: 'Deuteronomy', name: 'Caleb', description: 'Caleb is remembered as one of the faithful spies who wholly followed the Lord.', scriptures: 'Key passage: Deuteronomy 1:36.' },
+      { book: 'Deuteronomy', name: 'Sihon', description: 'Sihon, king of Heshbon, opposed Israel and was defeated.', scriptures: 'Key passages: Deuteronomy 2:24–37.' },
+      { book: 'Deuteronomy', name: 'Og', description: 'Og, king of Bashan, was defeated by Israel. His defeat shows God giving Israel victory east of Jordan.', scriptures: 'Key passage: Deuteronomy 3:1–11.' },
+      { book: 'Deuteronomy', name: 'Balaam', description: 'Balaam is mentioned as someone hired to curse Israel, but God turned the curse into blessing.', scriptures: 'Key passage: Deuteronomy 23:4–5.' },
+      { book: 'Deuteronomy', name: 'Amalek', description: 'Amalek is remembered as Israel’s enemy who attacked the weak during the Exodus journey.', scriptures: 'Key passage: Deuteronomy 25:17–19.' },
+
+      { book: 'Joshua', name: 'Joshua', description: 'Joshua first appears earlier under Moses, but becomes the main leader in Joshua 1:1. He succeeds Moses, leads Israel across the Jordan River, conquers much of Canaan, and divides the promised land among the tribes.', scriptures: 'Key stories: crossing Jordan, Joshua 3–4; Jericho, Joshua 6; covenant renewal, Joshua 24.' },
+      { book: 'Joshua', name: 'Rahab', description: 'Rahab appears in Joshua 2:1 as a woman in Jericho who hides Israelite spies. Because of her faith and protection of Israel, she and her family are spared.', scriptures: 'Key stories: Joshua 2; Joshua 6:22–25.' },
+      { book: 'Joshua', name: 'Caleb', description: 'Caleb continues as one of the faithful generation. He requests Hebron as his inheritance and defeats giants there.', scriptures: 'Key story: Joshua 14:6–15.' },
+      { book: 'Joshua', name: 'Achan', description: 'Achan appears in Joshua 7:1. He secretly steals forbidden spoils from Jericho, bringing judgment upon Israel.', scriptures: 'Key story: Joshua 7.' },
+      { book: 'Joshua', name: 'Eleazar', description: 'Eleazar, son of Aaron, helps oversee division of the land.', scriptures: 'Key references: Joshua 14:1; Joshua 21.' },
+      { book: 'Joshua', name: 'The Gibeonites', description: 'The Gibeonites appear in Joshua 9 and trick Israel into making a treaty. They are later protected as servants.', scriptures: 'Key story: Joshua 9.' },
+      { book: 'Joshua', name: 'Adoni-zedek', description: 'Adoni-zedek appears in Joshua 10 as king of Jerusalem who fights against Israel.', scriptures: 'Key story: Joshua 10.' },
+
+      { book: 'Judges', name: 'Othniel', description: 'Othniel appears in Judges 3:9 as Israel’s first judge. He delivers Israel from oppression.', scriptures: 'Key story: Judges 3:7–11.' },
+      { book: 'Judges', name: 'Ehud', description: 'Ehud appears in Judges 3:15 as the left-handed judge who assassinates King Eglon of Moab.', scriptures: 'Key story: Judges 3:12–30.' },
+      { book: 'Judges', name: 'Eglon', description: 'Eglon is the obese Moabite king killed by Ehud.', scriptures: 'Key story: Judges 3.' },
+      { book: 'Judges', name: 'Shamgar', description: 'Shamgar appears briefly in Judges 3:31 and kills 600 Philistines with an ox goad.', scriptures: 'Key passage: Judges 3:31.' },
+      { book: 'Judges', name: 'Deborah', description: 'Deborah appears in Judges 4:4 as a prophetess and judge. She leads Israel spiritually and politically.', scriptures: 'Key stories: Judges 4–5.' },
+      { book: 'Judges', name: 'Barak', description: 'Barak appears in Judges 4:6 as military leader under Deborah.', scriptures: 'Key stories: Judges 4–5.' },
+      { book: 'Judges', name: 'Sisera', description: 'Sisera is commander of Canaanite forces defeated by Deborah and Barak. He is killed by Jael.', scriptures: 'Key story: Judges 4.' },
+      { book: 'Judges', name: 'Jael', description: 'Jael appears in Judges 4:17. She kills Sisera with a tent peg while he sleeps.', scriptures: 'Key story: Judges 4:17–22.' },
+      { book: 'Judges', name: 'Gideon/Jerubbaal', description: 'Gideon appears in Judges 6:11. He defeats Midian with only 300 men after God reduces his army.', scriptures: 'Key stories: Judges 6–8.' },
+      { book: 'Judges', name: 'Abimelech', description: 'Abimelech appears in Judges 8:31 as Gideon’s son. He murders his brothers and briefly rules violently.', scriptures: 'Key stories: Judges 9.' },
+      { book: 'Judges', name: 'Jotham', description: 'Jotham appears in Judges 9:5 as Gideon’s surviving son who delivers the famous parable of the trees.', scriptures: 'Key story: Judges 9:7–21.' },
+      { book: 'Judges', name: 'Jephthah', description: 'Jephthah appears in Judges 11 as a judge who defeats the Ammonites but makes a tragic vow concerning his daughter.', scriptures: 'Key stories: Judges 11–12.' },
+      { book: 'Judges', name: 'Jephthah\'s daughter', description: 'She appears in Judges 11 and becomes associated with Jephthah\'s vow.', scriptures: 'Key story: Judges 11:30–40.' },
+      { book: 'Judges', name: 'Samson', description: 'Samson appears in Judges 13 as a Nazirite judge with supernatural strength. He battles the Philistines but is weakened by Delilah.', scriptures: 'Key stories: Judges 13–16.' },
+      { book: 'Judges', name: 'Delilah', description: 'Delilah appears in Judges 16 and betrays Samson to the Philistines.', scriptures: 'Key story: Judges 16.' },
+      { book: 'Judges', name: 'Micah', description: 'Micah appears in Judges 17 as a man associated with idolatry during Israel’s spiritual decline.', scriptures: 'Key stories: Judges 17–18.' },
+      { book: 'Judges', name: 'The Levite and his concubine', description: 'These unnamed figures appear in Judges 19 in one of the Bible’s darkest stories, leading to civil war in Israel.', scriptures: 'Key stories: Judges 19–21.' },
+
+      { book: 'Ruth', name: 'Ruth', description: 'Ruth appears in Ruth 1:4 as a Moabite widow who loyally follows Naomi and later marries Boaz. She becomes ancestor of David and ultimately Jesus.', scriptures: 'Key stories: Ruth 1–4.' },
+      { book: 'Ruth', name: 'Naomi', description: 'Naomi appears in Ruth 1:2 as Ruth’s mother-in-law. After losing her husband and sons, she returns to Bethlehem with Ruth.', scriptures: 'Key stories: Ruth 1–4.' },
+      { book: 'Ruth', name: 'Boaz', description: 'Boaz appears in Ruth 2:1 as Ruth’s kinsman-redeemer. He marries Ruth and preserves Naomi’s family line.', scriptures: 'Key stories: Ruth 2–4.' },
+      { book: 'Ruth', name: 'Orpah', description: 'Orpah appears in Ruth 1 as Naomi’s other daughter-in-law who returns to Moab.', scriptures: 'Key story: Ruth 1.' },
+
+      { book: '1 Samuel', name: 'Samuel', description: 'Samuel appears in 1 Samuel 1 as prophet, judge, and kingmaker. Dedicated by Hannah, he hears God’s voice as a child and later anoints Saul and David.', scriptures: 'Key stories: 1 Samuel 1–3; anointing Saul, 1 Samuel 10; anointing David, 1 Samuel 16.' },
+      { book: '1 Samuel', name: 'Hannah', description: 'Hannah appears in 1 Samuel 1 as Samuel’s faithful mother who prays for a child.', scriptures: 'Key stories: 1 Samuel 1–2.' },
+      { book: '1 Samuel', name: 'Eli', description: 'Eli appears in 1 Samuel 1:9 as priest who mentors Samuel. His sons’ wickedness brings judgment on his family.', scriptures: 'Key stories: 1 Samuel 1–4.' },
+      { book: '1 Samuel', name: 'Hophni and Phinehas', description: 'Sons of Eli who corrupt the priesthood.', scriptures: 'Key stories: 1 Samuel 2–4.' },
+      { book: '1 Samuel', name: 'Saul', description: 'Saul appears in 1 Samuel 9 as Israel’s first king. He begins humbly but becomes jealous, disobedient, and unstable.', scriptures: 'Key stories: 1 Samuel 9–15; conflict with David, 1 Samuel 18–31.' },
+      { book: '1 Samuel', name: 'Jonathan', description: 'Jonathan appears in 1 Samuel 13 as Saul’s noble son and David’s close friend.', scriptures: 'Key stories: 1 Samuel 14; friendship covenant, 1 Samuel 18–20.' },
+      { book: '1 Samuel', name: 'David', description: 'David appears in 1 Samuel 16 as shepherd anointed to become king. He kills Goliath and later flees Saul.', scriptures: 'Key stories: anointing, 1 Samuel 16; Goliath, 1 Samuel 17; Saul conflict, 1 Samuel 18–31.' },
+      { book: '1 Samuel', name: 'Goliath', description: 'Goliath appears in 1 Samuel 17 as giant Philistine champion defeated by David.', scriptures: 'Key story: 1 Samuel 17.' },
+      { book: '1 Samuel', name: 'Michal', description: 'Michal appears in 1 Samuel 18 as Saul’s daughter and David’s wife. She helps David escape Saul.', scriptures: 'Key stories: 1 Samuel 18–19.' },
+      { book: '1 Samuel', name: 'Abigail', description: 'Abigail appears in 1 Samuel 25 as wise wife of Nabal who prevents David from bloodshed. She later marries David.', scriptures: 'Key story: 1 Samuel 25.' },
+      { book: '1 Samuel', name: 'Nabal', description: 'Nabal appears in 1 Samuel 25 as a foolish wealthy man who insults David.', scriptures: 'Key story: 1 Samuel 25.' },
+      { book: '1 Samuel', name: 'The Witch of Endor', description: 'Appears in 1 Samuel 28 when Saul seeks forbidden spiritual counsel.', scriptures: 'Key story: 1 Samuel 28.' },
+
+      { book: '2 Samuel', name: 'David', description: 'David becomes king over Judah and later all Israel. He captures Jerusalem, brings the ark there, sins with Bathsheba, and faces family rebellion.', scriptures: 'Key stories: covenant, 2 Samuel 7; Bathsheba, 2 Samuel 11–12; Absalom rebellion, 2 Samuel 15–18.' },
+      { book: '2 Samuel', name: 'Bathsheba', description: 'Bathsheba appears in 2 Samuel 11 as wife of Uriah. David commits adultery with her, and she later becomes mother of Solomon.', scriptures: 'Key stories: 2 Samuel 11–12.' },
+      { book: '2 Samuel', name: 'Uriah', description: 'Uriah appears in 2 Samuel 11 as loyal soldier murdered through David’s schemes.', scriptures: 'Key story: 2 Samuel 11.' },
+      { book: '2 Samuel', name: 'Nathan', description: 'Nathan appears in 2 Samuel 7 as prophet who delivers God’s covenant to David and later rebukes David for sin.', scriptures: 'Key stories: 2 Samuel 7; 2 Samuel 12.' },
+      { book: '2 Samuel', name: 'Absalom', description: 'Absalom appears in 2 Samuel 13 as David’s son who rebels against him.', scriptures: 'Key stories: 2 Samuel 13–18.' },
+      { book: '2 Samuel', name: 'Amnon', description: 'Amnon appears in 2 Samuel 13 and assaults Tamar, leading to Absalom’s revenge.', scriptures: 'Key story: 2 Samuel 13.' },
+      { book: '2 Samuel', name: 'Tamar', description: 'Tamar appears in 2 Samuel 13 as David’s daughter victimized by Amnon.', scriptures: 'Key story: 2 Samuel 13.' },
+      { book: '2 Samuel', name: 'Joab', description: 'Joab appears throughout David’s reign as military commander. He is loyal but ruthless.', scriptures: 'Key stories: 2 Samuel 2–20.' },
+      { book: '2 Samuel', name: 'Abner', description: 'Abner appears as Saul’s commander who later supports David.', scriptures: 'Key stories: 2 Samuel 2–3.' },
+      { book: '2 Samuel', name: 'Ish-bosheth', description: 'Ish-bosheth is Saul’s son who briefly rules northern Israel.', scriptures: 'Key stories: 2 Samuel 2–4.' },
+
+      { book: '1 Kings', name: 'Solomon', description: 'Solomon appears as David’s successor. He builds the temple and becomes famous for wisdom, wealth, and later idolatry.', scriptures: 'Key stories: wisdom, 1 Kings 3; temple, 1 Kings 5–8; decline, 1 Kings 11.' },
+      { book: '1 Kings', name: 'Rehoboam', description: 'Rehoboam appears in 1 Kings 12 as Solomon’s son whose harshness divides the kingdom.', scriptures: 'Key story: 1 Kings 12.' },
+      { book: '1 Kings', name: 'Jeroboam', description: 'Jeroboam appears in 1 Kings 11–12 as first king of northern Israel. He establishes golden calves at Bethel and Dan.', scriptures: 'Key stories: 1 Kings 11–14.' },
+      { book: '1 Kings', name: 'Elijah', description: 'Elijah appears in 1 Kings 17 as prophet confronting Ahab and Baal worship.', scriptures: 'Key stories: drought, 1 Kings 17; Mount Carmel, 1 Kings 18; still small voice, 1 Kings 19.' },
+      { book: '1 Kings', name: 'Ahab', description: 'Ahab appears in 1 Kings 16 as wicked king of Israel married to Jezebel.', scriptures: 'Key stories: 1 Kings 16–22.' },
+      { book: '1 Kings', name: 'Jezebel', description: 'Jezebel appears in 1 Kings 16 as Phoenician queen promoting Baal worship.', scriptures: 'Key stories: 1 Kings 18–21.' },
+      { book: '1 Kings', name: 'Naboth', description: 'Naboth appears in 1 Kings 21 as owner of vineyard stolen through Jezebel’s schemes.', scriptures: 'Key story: 1 Kings 21.' },
+      { book: '1 Kings', name: 'The Queen of Sheba', description: 'She visits Solomon to test his wisdom.', scriptures: 'Key story: 1 Kings 10.' },
+
+      { book: '2 Kings', name: 'Elisha', description: 'Elisha appears in 2 Kings 2 as Elijah’s prophetic successor. He performs many miracles including healing Naaman, multiplying oil, and raising the dead.', scriptures: 'Key stories: Elijah’s departure, 2 Kings 2; widow’s oil, 2 Kings 4; Naaman healed, 2 Kings 5.' },
+      { book: '2 Kings', name: 'Naaman', description: 'Naaman appears in 2 Kings 5 as a Syrian military commander with leprosy. Elisha tells him to wash in the Jordan River seven times, and he is healed.', scriptures: 'Key story: 2 Kings 5.' },
+      { book: '2 Kings', name: 'Gehazi', description: 'Gehazi appears as Elisha’s servant. He greedily accepts gifts from Naaman and is struck with leprosy.', scriptures: 'Key story: 2 Kings 5:20–27.' },
+      { book: '2 Kings', name: 'Jehu', description: 'Jehu appears in 2 Kings 9 as a military commander anointed king of Israel. He destroys Ahab’s house and kills Jezebel.', scriptures: 'Key stories: 2 Kings 9–10.' },
+      { book: '2 Kings', name: 'Jezebel', description: 'Jezebel dies dramatically when thrown from a window during Jehu’s revolt.', scriptures: 'Key story: 2 Kings 9:30–37.' },
+      { book: '2 Kings', name: 'Hezekiah', description: 'Hezekiah appears in 2 Kings 18 as righteous king of Judah. He trusts God against Assyria and reforms worship.', scriptures: 'Key stories: 2 Kings 18–20.' },
+      { book: '2 Kings', name: 'Isaiah', description: 'Isaiah appears advising Hezekiah during Assyria’s invasion.', scriptures: 'Key stories: 2 Kings 19–20.' },
+      { book: '2 Kings', name: 'Sennacherib', description: 'Sennacherib appears as king of Assyria threatening Jerusalem. His army is destroyed by divine intervention.', scriptures: 'Key stories: 2 Kings 18–19.' },
+      { book: '2 Kings', name: 'Manasseh', description: 'Manasseh appears in 2 Kings 21 as one of Judah’s most wicked kings, promoting idolatry.', scriptures: 'Key story: 2 Kings 21.' },
+      { book: '2 Kings', name: 'Josiah', description: 'Josiah appears in 2 Kings 22 as reforming king who rediscovers the Book of the Law and renews covenant worship.', scriptures: 'Key stories: 2 Kings 22–23.' },
+      { book: '2 Kings', name: 'Hilkiah', description: 'Hilkiah appears in 2 Kings 22 as priest who discovers the Law scroll in the temple.', scriptures: 'Key story: 2 Kings 22.' },
+      { book: '2 Kings', name: 'Huldah', description: 'Huldah appears in 2 Kings 22 as prophetess confirming God’s coming judgment and Josiah’s faithfulness.', scriptures: 'Key story: 2 Kings 22:14–20.' },
+      { book: '2 Kings', name: 'Nebuchadnezzar', description: 'Nebuchadnezzar appears as Babylonian king who destroys Jerusalem and exiles Judah.', scriptures: 'Key stories: 2 Kings 24–25.' },
+
+      { book: '1 Chronicles', name: 'David', description: 'Chronicles focuses heavily on David’s preparation for the temple and organization of worship.', scriptures: 'Key stories: bringing ark, 1 Chronicles 13–16; temple preparations, 1 Chronicles 22–29.' },
+      { book: '1 Chronicles', name: 'Asaph', description: 'Asaph appears as a Levite musician appointed by David for temple worship.', scriptures: 'Key references: 1 Chronicles 16; Psalm titles.' },
+      { book: '1 Chronicles', name: 'Zadok', description: 'Zadok appears as faithful high priest during David’s reign.', scriptures: 'Key stories: 1 Chronicles 24.' },
+      { book: '1 Chronicles', name: 'Benaiah', description: 'Benaiah appears as one of David’s mighty warriors.', scriptures: 'Key stories: 1 Chronicles 11.' },
+
+      { book: '2 Chronicles', name: 'Solomon', description: 'Solomon builds and dedicates the temple in Jerusalem.', scriptures: 'Key stories: 2 Chronicles 1–9.' },
+      { book: '2 Chronicles', name: 'Rehoboam', description: 'Rehoboam’s poor leadership causes the kingdom split.', scriptures: 'Key story: 2 Chronicles 10.' },
+      { book: '2 Chronicles', name: 'Asa', description: 'Asa appears as a reforming king who removes idols and seeks God.', scriptures: 'Key stories: 2 Chronicles 14–16.' },
+      { book: '2 Chronicles', name: 'Jehoshaphat', description: 'Jehoshaphat appears as righteous king allied improperly with Ahab.', scriptures: 'Key stories: 2 Chronicles 17–20.' },
+      { book: '2 Chronicles', name: 'Uzziah/Azariah', description: 'Uzziah appears as successful king who becomes prideful and is struck with leprosy after unlawfully entering the temple.', scriptures: 'Key story: 2 Chronicles 26.' },
+      { book: '2 Chronicles', name: 'Hezekiah', description: 'Hezekiah restores temple worship and celebrates Passover.', scriptures: 'Key stories: 2 Chronicles 29–32.' },
+      { book: '2 Chronicles', name: 'Josiah', description: 'Josiah renews covenant worship after rediscovery of the Law.', scriptures: 'Key stories: 2 Chronicles 34–35.' },
+      { book: '2 Chronicles', name: 'Cyrus', description: 'Cyrus appears at the end of Chronicles allowing Jews to return from exile.', scriptures: 'Key passage: 2 Chronicles 36:22–23.' },
+
+      { book: 'Ezra', name: 'Ezra', description: 'Ezra appears in Ezra 7 as priest and scribe leading returning exiles spiritually.', scriptures: 'Key stories: Ezra 7–10.' },
+      { book: 'Ezra', name: 'Zerubbabel', description: 'Zerubbabel appears in Ezra 2 and leads the first return from Babylon. He helps rebuild the temple.', scriptures: 'Key stories: Ezra 1–6.' },
+      { book: 'Ezra', name: 'Jeshua/Joshua the high priest', description: 'Jeshua appears helping restore worship and rebuild the temple.', scriptures: 'Key stories: Ezra 3–6.' },
+      { book: 'Ezra', name: 'Artaxerxes', description: 'Artaxerxes appears as Persian king supporting Ezra and Nehemiah.', scriptures: 'Key stories: Ezra 7.' },
+      { book: 'Ezra', name: 'Haggai', description: 'Haggai encourages temple rebuilding. Connected to Zerubbabel.', scriptures: 'Key references: Ezra 5–6.' },
+      { book: 'Ezra', name: 'Zechariah', description: 'Zechariah supports rebuilding efforts prophetically.', scriptures: 'Key references: Ezra 5–6.' },
+
+      { book: 'Nehemiah', name: 'Nehemiah', description: 'Nehemiah appears as cupbearer to Artaxerxes who rebuilds Jerusalem’s walls.', scriptures: 'Key stories: Nehemiah 1–6; reforms, Nehemiah 8–13.' },
+      { book: 'Nehemiah', name: 'Sanballat', description: 'Sanballat opposes Nehemiah’s rebuilding efforts.', scriptures: 'Key stories: Nehemiah 4–6.' },
+      { book: 'Nehemiah', name: 'Tobiah', description: 'Tobiah is another opponent resisting Jerusalem’s restoration.', scriptures: 'Key stories: Nehemiah 2–6.' },
+      { book: 'Nehemiah', name: 'Ezra', description: 'Ezra reappears reading the Law publicly to the people.', scriptures: 'Key story: Nehemiah 8.' },
+
+      { book: 'Esther', name: 'Esther', description: 'Esther appears as Jewish queen of Persia who courageously saves her people from destruction.', scriptures: 'Key stories: Esther 1–10.' },
+      { book: 'Esther', name: 'Mordecai', description: 'Mordecai appears as Esther’s cousin and guardian who uncovers a plot against the king and opposes Haman.', scriptures: 'Key stories: Esther 2–10.' },
+      { book: 'Esther', name: 'Haman', description: 'Haman appears as villain plotting genocide against the Jews.', scriptures: 'Key stories: Esther 3–7.' },
+      { book: 'Esther', name: 'King Ahasuerus/Xerxes', description: 'Persian king manipulated by Haman but later influenced by Esther.', scriptures: 'Key stories: Esther 1–10.' },
+      { book: 'Esther', name: 'Vashti', description: 'Vashti appears as queen removed after refusing the king’s command.', scriptures: 'Key story: Esther 1.' },
+
+      { book: 'Job', name: 'Job', description: 'Job appears as righteous man tested through suffering, loss, and illness. He wrestles with God’s justice but remains faithful.', scriptures: 'Key stories: Job 1–2; speeches, Job 3–37; God’s response, Job 38–42.' },
+      { book: 'Job', name: 'Eliphaz', description: 'Eliphaz appears as one of Job’s friends arguing suffering comes from sin.', scriptures: 'Key sections: Job 4–5 and later speeches.' },
+      { book: 'Job', name: 'Bildad', description: 'Bildad argues traditional justice theology against Job.', scriptures: 'Key speeches: Job 8; 18; 25.' },
+      { book: 'Job', name: 'Zophar', description: 'Zophar harshly accuses Job.', scriptures: 'Key speeches: Job 11; 20.' },
+      { book: 'Job', name: 'Elihu', description: 'Elihu appears later criticizing both Job and the friends.', scriptures: 'Key speeches: Job 32–37.' },
+
+      { book: 'Psalms', name: 'David', description: 'David is associated with many Psalms expressing worship, repentance, suffering, kingship, and praise.', scriptures: 'Key Psalms: 23, 51, 103.' },
+      { book: 'Psalms', name: 'Asaph', description: 'Asaph writes worship and judgment Psalms.', scriptures: 'Key Psalms: 73–83.' },
+      { book: 'Psalms', name: 'The Sons of Korah', description: 'Levite worshippers connected to temple Psalms.', scriptures: 'Key Psalms: 42–49.' },
+      { book: 'Psalms', name: 'Solomon', description: 'Solomon contributes wisdom-related Psalms.', scriptures: 'Key Psalms: 72 and 127.' },
+
+      { book: 'Proverbs', name: 'Solomon', description: 'Solomon is primary author of Proverbs, teaching wisdom, discipline, and fear of the Lord.', scriptures: 'Key chapters: Proverbs 1–9.' },
+      { book: 'Proverbs', name: 'Agur', description: 'Agur appears in Proverbs 30 giving wisdom sayings.', scriptures: 'Key chapter: Proverbs 30.' },
+      { book: 'Proverbs', name: 'King Lemuel', description: 'Lemuel appears in Proverbs 31 receiving wisdom from his mother.', scriptures: 'Key chapter: Proverbs 31.' },
+      { book: 'Proverbs', name: 'The Virtuous Woman', description: 'The woman of Proverbs 31 represents ideal wisdom and faithful living.', scriptures: 'Key passage: Proverbs 31:10–31.' },
+
+      { book: 'Ecclesiastes', name: 'The Preacher/Koheleth', description: 'Traditionally associated with Solomon, the Preacher reflects on life’s meaning, mortality, and vanity.', scriptures: 'Key passages: Ecclesiastes 1; 3; 12.' },
+
+      { book: 'Song of Solomon', name: 'The Beloved/Shulammite woman', description: 'Central female figure in poetic love dialogue. Connected to Solomon.', scriptures: 'Key passages throughout the book.' },
+      { book: 'Song of Solomon', name: 'Solomon', description: 'Solomon appears as royal lover figure in the poetic narrative.', scriptures: 'Key passages: Song of Solomon 3; 8.' },
+
+      { book: 'Isaiah', name: 'Isaiah', description: 'Isaiah appears as prophet during Judah’s crises, warning of judgment and foretelling Messiah and restoration.', scriptures: 'Key stories: call vision, Isaiah 6; Immanuel prophecy, Isaiah 7; suffering servant, Isaiah 53.' },
+      { book: 'Isaiah', name: 'Ahaz', description: 'Ahaz appears as fearful king during foreign threats.', scriptures: 'Key story: Isaiah 7.' },
+      { book: 'Isaiah', name: 'Hezekiah', description: 'Hezekiah appears during Assyria’s invasion and receives miraculous deliverance.', scriptures: 'Key stories: Isaiah 36–39.' },
+      { book: 'Isaiah', name: 'The Suffering Servant', description: 'Appears especially in Isaiah 42, 49, 50, and 53 as prophetic figure associated by Christians with Christ.', scriptures: 'Key passages: Isaiah 42; 49; 50; 53.' },
+      { book: 'Isaiah', name: 'Lucifer/King of Babylon imagery', description: 'Isaiah 14 contains taunt imagery against Babylon later associated with Satan.', scriptures: 'Key passage: Isaiah 14.' },
+
+      { book: 'Jeremiah', name: 'Jeremiah', description: 'Jeremiah appears as prophet warning Judah before Babylonian destruction. Known as the “weeping prophet.”', scriptures: 'Key stories: call, Jeremiah 1; temple sermon, Jeremiah 7; new covenant, Jeremiah 31.' },
+      { book: 'Jeremiah', name: 'Baruch', description: 'Baruch appears as Jeremiah’s scribe writing prophetic scrolls.', scriptures: 'Key stories: Jeremiah 36.' },
+      { book: 'Jeremiah', name: 'Zedekiah', description: 'Zedekiah appears as Judah’s final king before Babylon destroys Jerusalem.', scriptures: 'Key stories: Jeremiah 37–39.' },
+      { book: 'Jeremiah', name: 'Nebuchadnezzar', description: 'Nebuchadnezzar is Babylonian king conquering Judah.', scriptures: 'Key stories throughout Jeremiah.' },
+
+      { book: 'Lamentations', name: 'Jeremiah (traditionally)', description: 'Traditionally connected to lamenting Jerusalem’s destruction.', scriptures: 'Key chapters: Lamentations 1–5.' },
+
+      { book: 'Ezekiel', name: 'Ezekiel', description: 'Ezekiel appears as prophet among Babylonian exiles receiving dramatic visions.', scriptures: 'Key stories: vision of God, Ezekiel 1; dry bones, Ezekiel 37; new temple, Ezekiel 40–48.' },
+      { book: 'Ezekiel', name: 'Gog', description: 'Gog appears in apocalyptic prophecy against restored Israel.', scriptures: 'Key passages: Ezekiel 38–39.' },
+
+      { book: 'Daniel', name: 'Daniel', description: 'Daniel appears as Jewish exile serving Babylonian and Persian kings. Known for wisdom and prophetic visions.', scriptures: 'Key stories: lions\' den, Daniel 6; visions, Daniel 7–12.' },
+      { book: 'Daniel', name: 'Shadrach, Meshach, and Abednego', description: 'Friends of Daniel thrown into fiery furnace for refusing idol worship.', scriptures: 'Key story: Daniel 3.' },
+      { book: 'Daniel', name: 'Nebuchadnezzar', description: 'Nebuchadnezzar appears as Babylonian king humbled by God after pride.', scriptures: 'Key stories: Daniel 2–4.' },
+      { book: 'Daniel', name: 'Belshazzar', description: 'Belshazzar appears at the “writing on the wall” feast before Babylon falls.', scriptures: 'Key story: Daniel 5.' },
+      { book: 'Daniel', name: 'Darius', description: 'Darius appears during Daniel’s lions\' den story.', scriptures: 'Key story: Daniel 6.' },
+      { book: 'Daniel', name: 'Gabriel', description: 'Gabriel appears interpreting Daniel’s visions.', scriptures: 'Key stories: Daniel 8–9.' },
+      { book: 'Daniel', name: 'Michael', description: 'Michael appears as heavenly prince protecting God’s people.', scriptures: 'Key passages: Daniel 10; 12.' },
+
+      { book: 'Hosea', name: 'Hosea', description: 'Hosea appears as prophet whose marriage symbolizes Israel’s unfaithfulness.', scriptures: 'Key stories: Hosea 1–3.' },
+      { book: 'Hosea', name: 'Gomer', description: 'Gomer appears as Hosea’s unfaithful wife representing Israel’s spiritual adultery.', scriptures: 'Key stories: Hosea 1–3.' },
+
+      { book: 'Joel', name: 'Joel', description: 'Joel warns of judgment through locust plague imagery and promises outpouring of God’s Spirit.', scriptures: 'Key passages: Joel 1–3; especially Joel 2:28–32.' },
+
+      { book: 'Amos', name: 'Amos', description: 'Amos appears as shepherd-prophet denouncing injustice and corruption in Israel.', scriptures: 'Key passages: Amos 5; 9.' },
+
+      { book: 'Obadiah', name: 'Obadiah', description: 'Obadiah prophesies judgment against Edom for opposing Judah.', scriptures: 'Entire book.' },
+
+      { book: 'Jonah', name: 'Jonah', description: 'Jonah appears as reluctant prophet sent to Nineveh. He flees, is swallowed by a great fish, then preaches repentance.', scriptures: 'Key stories: Jonah 1–4.' },
+
+      { book: 'Micah', name: 'Micah', description: 'Micah warns Judah and Israel while foretelling Messiah’s birth in Bethlehem.', scriptures: 'Key passages: Micah 5:2; Micah 6:8.' },
+
+      { book: 'Nahum', name: 'Nahum', description: 'Nahum prophesies destruction of Nineveh and Assyria.', scriptures: 'Entire book.' },
+
+      { book: 'Habakkuk', name: 'Habakkuk', description: 'Habakkuk questions why evil prospers and receives answers about faith and judgment.', scriptures: 'Key passages: Habakkuk 1–3; especially 2:4.' },
+
+      { book: 'Zephaniah', name: 'Zephaniah', description: 'Zephaniah warns about the Day of the Lord and future restoration.', scriptures: 'Key passages: Zephaniah 1–3.' },
+
+      { book: 'Haggai', name: 'Haggai', description: 'Haggai encourages returned exiles to rebuild the temple.', scriptures: 'Key chapters: Haggai 1–2.' },
+      { book: 'Haggai', name: 'Zerubbabel', description: 'Zerubbabel: Governor helping rebuild Jerusalem and temple after exile.', scriptures: 'Key passages: Haggai 1–2.' },
+      { book: 'Haggai', name: 'Joshua the high priest', description: 'Spiritual leader during restoration.', scriptures: 'Key passages: Haggai 1–2.' },
+
+      { book: 'Zechariah', name: 'Zechariah', description: 'Zechariah appears as apocalyptic prophet encouraging restoration and foretelling Messianic themes.', scriptures: 'Key passages: Zechariah 3; 9; 12–14.' },
+      { book: 'Zechariah', name: 'Joshua the high priest', description: 'Appears in Zechariah’s visions as symbol of cleansing and restoration.', scriptures: 'Key story: Zechariah 3.' },
+      { book: 'Zechariah', name: 'Zerubbabel', description: 'Appears in visions concerning temple rebuilding.', scriptures: 'Key story: Zechariah 4.' },
+
+      { book: 'Malachi', name: 'Malachi', description: 'Malachi appears as final Old Testament prophet confronting corrupt priests, divorce, and spiritual apathy while promising Elijah’s future coming.', scriptures: 'Key passages: Malachi 1–4.' },
+      { book: 'Malachi', name: 'The Messenger/Elijah figure', description: 'Malachi foretells a coming messenger preparing the Lord’s way and Elijah returning before the Day of the Lord.', scriptures: 'Key passages: Malachi 3:1; Malachi 4:5–6.' }
+    ];
+
+    const timeline = document.getElementById("timeline");
+    const searchInput = document.getElementById("searchInput");
+    const bookFilter = document.getElementById("bookFilter");
+    const clearBtn = document.getElementById("clearBtn");
+    const emptyMessage = document.getElementById("emptyMessage");
+
+    function groupByBook(data) {
+      return data.reduce((groups, item) => {
+        if (!groups[item.book]) groups[item.book] = [];
+        groups[item.book].push(item);
+        return groups;
+      }, {});
+    }
+
+    function shortPreview(text) {
+      return text.length > 95 ? text.slice(0, 95) + "..." : text;
+    }
+
+    function populateBookFilter() {
+      const books = [...new Set(characterData.map(item => item.book))];
+      books.forEach(book => {
+        const option = document.createElement("option");
+        option.value = book;
+        option.textContent = book;
+        bookFilter.appendChild(option);
+      });
+    }
+
+    function renderTimeline() {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      const selectedBook = bookFilter.value;
+
+      const filtered = characterData.filter(item => {
+        const searchableText = `${item.book} ${item.name} ${item.description} ${item.scriptures}`.toLowerCase();
+        const matchesSearch = searchableText.includes(searchTerm);
+        const matchesBook = selectedBook === "all" || item.book === selectedBook;
+        return matchesSearch && matchesBook;
+      });
+
+      timeline.innerHTML = "";
+      emptyMessage.classList.toggle("hidden", filtered.length > 0);
+
+      const grouped = groupByBook(filtered);
+
+      Object.keys(grouped).forEach(book => {
+        const section = document.createElement("section");
+        section.className = "book-section";
+
+        const title = document.createElement("h2");
+        title.className = "book-title";
+        title.textContent = book;
+        section.appendChild(title);
+
+        const grid = document.createElement("div");
+        grid.className = "character-grid";
+
+        grouped[book].forEach(character => {
+          const card = document.createElement("article");
+          card.className = "character-card";
+          card.tabIndex = 0;
+
+          card.innerHTML = `
+            <div class="character-name">${character.name}</div>
+            <div class="mini">${shortPreview(character.description)}</div>
+            <div class="popup">
+              <strong>${character.name}</strong>
+              <p>${character.description}</p>
+              <div class="scriptures"><strong>Key scriptures/stories:</strong> ${character.scriptures}</div>
+            </div>
+          `;
+
+          grid.appendChild(card);
+        });
+
+        section.appendChild(grid);
+        timeline.appendChild(section);
+      });
+    }
+
+    searchInput.addEventListener("input", renderTimeline);
+    bookFilter.addEventListener("change", renderTimeline);
+    clearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      bookFilter.value = "all";
+      renderTimeline();
+    });
+
+    populateBookFilter();
+    renderTimeline();
+  </script>
+</body>
+</html>
